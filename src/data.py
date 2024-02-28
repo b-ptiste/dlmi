@@ -28,7 +28,7 @@ class DataloaderFactory:
                 shuffle=shuffle,
                 drop_last=drop_last,
             )
-            return dataloader
+            
         elif cfg["dataset_name"] == "DatasetPerPatient":
             dataset = DatasetPerPatient(path_root, split_indexes, mode, transform)
             dataloader = DataLoader(
@@ -37,6 +37,9 @@ class DataloaderFactory:
                 shuffle=shuffle,
                 drop_last=drop_last,
             )
+        else:
+            raise NotImplemented(f"{cfg['dataset_name']} don't register")
+        return dataloader
 
 
 class DatasetPerImg(Dataset):
@@ -112,6 +115,8 @@ class DatasetPerPatient(Dataset):
             if self.transform:
                 img = self.transform(img) / 255.0
             images.append(img)
+        
+        images = torch.stack(images)
 
         annotation = (
             self.df[["ID", "LYMPH_COUNT", "AGE", "BIN_GENDER", "LABEL"]]
