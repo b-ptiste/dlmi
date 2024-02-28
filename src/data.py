@@ -29,8 +29,14 @@ class DataloaderFactory:
                 drop_last=drop_last,
             )
             return dataloader
-        elif cfg["dataset_name"] == "nvx_data":
-            pass
+        elif cfg["dataset_name"] == "DatasetPerPatient":
+            dataset = DatasetPerPatient(path_root, split_indexes, mode, transform)
+            dataloader = DataLoader(
+                dataset,
+                batch_size=cfg["batch_size"],
+                shuffle=shuffle,
+                drop_last=drop_last,
+            )
 
 
 class DatasetPerImg(Dataset):
