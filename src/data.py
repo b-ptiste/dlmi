@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
+from datetime import datetime, timedelta
 
 
 class DataloaderFactory:
@@ -55,8 +56,7 @@ class DatasetPerImg(Dataset):
     def __getitem__(self, idx):
         _path = self.list_im[idx]
         image = Image.open(_path)
-
-        idx_patient = _path.split("/")[-2]
+        idx_patient = self.indexes[idx]
 
         annotation = (
             self.df[["ID", "LYMPH_COUNT", "AGE", "BIN_GENDER", "LABEL"]]
@@ -66,14 +66,57 @@ class DatasetPerImg(Dataset):
 
         if self.transform is not None:
             image = self.transform(image) / 255.0
-
         return image, annotation
 
     def __len__(self):
         return len(self.list_im)
 
 
-from datetime import datetime, timedelta
+class DatasetPerPatient(Dataset):
+    def __init__(self, path_root, indexes, mode, transform=None):
+        self.indexes = indexes
+        self.transform = transform
+        self.patients_data = {}
+
+        if mode == "train":
+            path_csv = os.path.join(path_root, "trainset", "trainset_true.csv")
+            path_im = os.path.join(path_root, "trainset")
+        elif mode == "test":
+            path_csv = os.path.join(path_root, "testset", "testset_data.csv")
+            path_im = os.path.join(path_root, "testset")
+
+        self.df = csv_processing(path_csv)
+
+        for patient in indexes:
+            patient_folder = os.path.join(path_im, patient)
+            patient_im = [
+                os.path.join(patient_folder, img)
+                for img in os.listdir(patient_folder)
+                if img.endswith(".jpg")
+            ]
+            self.patients_data[patient] = patient_im
+
+    def __getitem__(self, idx):
+        patient_id = self.indexes[idx]
+        patient_images = self.patients_data[patient_id]
+        images = []
+
+        for img_path in patient_images:
+            img = Image.open(img_path).convert("RGB")
+            if self.transform:
+                img = self.transform(img) / 255.0
+            images.append(img)
+
+        annotation = (
+            self.df[["ID", "LYMPH_COUNT", "AGE", "BIN_GENDER", "LABEL"]]
+            .loc[patient_id]
+            .to_dict()
+        )
+
+        return images, annotation
+
+    def __len__(self):
+        return len(self.indexes)
 
 
 def calculate_age(dob_str):
