@@ -14,7 +14,12 @@ class ModelFactory:
                 pretrained=cfg["pretrain"],
                 num_classes=cfg["nb_class"],
             )
-        elif cfg["model_name"] == "nvx_model":
+        elif cfg["model_name"] == "patient_model":
+            model = timm.create_model(
+                cfg["model_name"]
+                pretrained=cfg["pretrain"],
+                num_classes=cfg["nb_class"],
+            )
             pass
 
         else:

@@ -66,7 +66,7 @@ class DatasetPerImg(Dataset):
     def __getitem__(self, idx):
         _path = self.list_im[idx]
         image = Image.open(_path)
-        idx_patient = self.indexes[idx]
+        idx_patient = _path.split("/")[-2]
 
         annotation = (
             self.df[["ID", "LYMPH_COUNT", "AGE", "BIN_GENDER", "LABEL"]]
