@@ -29,7 +29,7 @@ class DataloaderFactory:
                 shuffle=shuffle,
                 drop_last=drop_last,
             )
-            
+
         elif cfg["dataset_name"] == "DatasetPerPatient":
             dataset = DatasetPerPatient(path_root, split_indexes, mode, transform)
             dataloader = DataLoader(
@@ -116,7 +116,7 @@ class DatasetPerPatient(Dataset):
             if self.transform:
                 img = self.transform(img) / 255.0
             images.append(img)
-        
+
         images = torch.stack(images)
 
         annotation = (
