@@ -149,7 +149,7 @@ class DatasetPerPatient(Dataset):
         return images, annotation
 
     def __len__(self):
-        return len(self.indexes)
+        return len(self.map_idx_patient)
 
 
 def calculate_age(dob_str):
