@@ -28,7 +28,15 @@ class ModelFactory:
         for k, v in cfg.items():
             print(f"{k} : {v}")
 
-        if cfg["timm"]:
+        if cfg["model_name"] == "PatientModel":
+            print(f"Loading custom model {cfg['model_name']}")
+            return PatientModel(cfg)
+
+        elif cfg["model_name"] == "PatientModelAttention":
+            print(f"Loading custom model {cfg['model_name']}")
+            return PatientModelAttention(cfg)
+
+        elif cfg["timm"]:
             print(f"Loading timm model {cfg['model_name']}")
             return timm.create_model(
                 cfg["model_name"],
@@ -41,15 +49,6 @@ class ModelFactory:
             model = build_dino(cfg["dino_size"], cfg["adapter"])
             model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
             return model
-
-        elif cfg["model_name"] == "PatientModel":
-            print(f"Loading custom model {cfg['model_name']}")
-            return PatientModel(cfg)
-
-        elif cfg["model_name"] == "PatientModelAttention":
-            print(f"Loading custom model {cfg['model_name']}")
-            return PatientModelAttention(cfg)
-
         else:
             raise NotImplemented(f"{model_name} don't register")
 
