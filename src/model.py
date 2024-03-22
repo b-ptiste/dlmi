@@ -2,6 +2,20 @@ import timm
 import torch
 import torch.nn as nn
 
+# third party library
+from src.utils import aggregation
+
+from src.adapter import (
+    add_bottleneck_adapter,
+    freeze_model_bottleneck,
+    add_adaptformer,
+    freeze_model_adaptformer,
+    add_lora,
+    freeze_model_lora,
+    add_prompttuning,
+    freeze_model_prompttuning,
+)
+
 
 class ModelFactory:
     def __init__(self):
@@ -156,16 +170,6 @@ class PatientModelAttention(nn.Module):
         return proj_output
 
 
-def aggregation(x, mode):
-    if mode == "sum":
-        x = x.sum(0)
-    elif mode == "avg":
-        x = x.mean(0)
-    elif mode == "max":
-        x = x.max(0)
-    return x
-
-
 def build_dino(model_type, adapter):
     """
     Credit : DLMI TP
@@ -183,46 +187,22 @@ def build_dino(model_type, adapter):
         add_bottleneck_adapter(model)
         freeze_model_bottleneck(model)
 
+    elif adapter == "adaptformer":
+        print("Use adaptformer adapter")
+        add_adaptformer(model)
+        freeze_model_adaptformer(model)
+
+    elif adapter == "lora":
+        print("Use lora adapter")
+        add_lora(model)
+        freeze_model_lora(model)
+
+    elif adapter == "prompttuning":
+        print("Use prompttuning adapter")
+        add_prompttuning(model)
+        freeze_model_prompttuning(model)
+
+    else:
+        print("No adapter used")
+
     return model
-
-
-class BottleneckAdapter(nn.Module):
-    """
-    Credit : DLMI TP
-    """
-
-    def __init__(self, in_dim, activation="ReLU", reduction_factor=16):
-        super(BottleneckAdapter, self).__init__()
-
-        hidden_dim = in_dim // reduction_factor
-        self.adapter_downsample = nn.Linear(in_dim, hidden_dim)
-        self.activation = getattr(torch.nn, activation)()
-        self.adapter_upsample = nn.Linear(hidden_dim, in_dim)
-
-    def forward(self, x_in):
-        x_hid = self.activation(self.adapter_downsample(x_in))
-        x_out = self.adapter_upsample(x_hid)
-        return x_out + x_in
-
-
-def add_bottleneck_adapter(model):
-    """
-    Credit : DLMI TP
-    """
-    for block in model.blocks:
-        block.attn.proj = nn.Sequential(
-            block.attn.proj, BottleneckAdapter(block.attn.proj.in_features)
-        )
-        block.attn.mlp = nn.Sequential(
-            block.mlp, BottleneckAdapter(block.mlp.fc1.in_features)
-        )
-
-
-def freeze_model_bottleneck(model):
-    """
-    Credit : DLMI TP
-    """
-
-    for name, param in model.named_parameters():
-        if not ("adapter" in name or "norm1" in name or "norm2" in name):
-            param.requires_grad = False
