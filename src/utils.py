@@ -5,6 +5,16 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+def aggregation(x, mode):
+    if mode == "sum":
+        x = x.sum(0)
+    elif mode == "avg":
+        x = x.mean(0)
+    elif mode == "max":
+        x = x.max(0)
+    return x
+
+
 def get_stratified_split(
     df_annotation_train, df_annotation_test, save_path=None, ratio=0.8, with_plot=True
 ):
