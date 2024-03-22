@@ -37,15 +37,15 @@ class ModelFactory:
             return PatientModelAttention(cfg)
 
         elif cfg["timm"]:
-            print(f"Loading timm model {cfg['model_name']}")
+            print(f"Loading timm model {cfg['timm_model']}")
             return timm.create_model(
-                cfg["model_name"],
+                cfg["timm_model"],
                 pretrained=cfg["pretrained"],
                 num_classes=cfg["nb_class"],
             )
 
         elif cfg["dino"]:
-            print(f"Loading dino model {cfg['model_name']}")
+            print(f"Loading dino model {cfg['dino_size']}")
             model = build_dino(cfg["dino_size"], cfg["adapter"])
             model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
             return model
@@ -63,7 +63,7 @@ class PatientModel(nn.Module):
 
         if cfg["timm"]:
             self.model = timm.create_model(
-                cfg["model_name"],
+                cfg["timm_model"],
                 pretrained=cfg["pretrained"],
                 num_classes=cfg["nb_class"],
             )
@@ -113,7 +113,7 @@ class PatientModelAttention(nn.Module):
         # pick the right encoder model
         if cfg["timm"]:
             self.model = timm.create_model(
-                cfg["model_name"],
+                cfg["timm_model"],
                 pretrained=cfg["pretrained"],
                 num_classes=cfg["nb_class"],
             )
