@@ -38,12 +38,15 @@ class ModelFactory:
 
         elif cfg["timm"]:
             print(f"Loading timm model {cfg['timm_model']}")
-            return build_timm(cfg, cfg["adapter"])
+            model = build_timm(cfg)
+            add_adapter(model, cfg['adapter'])
+            return model
 
         elif cfg["dino"]:
             print(f"Loading dino model {cfg['dino_size']}")
-            model = build_dino(cfg["dino_size"], cfg["adapter"])
+            model = build_dino(cfg["dino_size"])
             model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
+            add_adapter(model, cfg['adapter'])
             return model
         else:
             raise NotImplemented(f"{model_name} don't register")
@@ -58,15 +61,16 @@ class PatientModel(nn.Module):
         self.sub_batch_size = cfg["sub_batch_size"]
 
         if cfg["timm"]:
-            self.model = build_timm(cfg, cfg["adapter"])
+            self.model = build_timm(cfg)
         elif cfg["dino"]:
-            self.model = build_dino(cfg["dino_size"], cfg["adapter"])
+            self.model = build_dino(cfg["dino_size"])
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
 
         if len(cfg["pretrained_path"]) > 0:
             self.model.load_state_dict(
                 torch.load(cfg["pretrained_path"])["model_state_dict"]
             )
+            add_adapter(self.model, cfg['adapter'])
 
     def forward(self, x, mode):
         #         x = x[torch.randperm(x.size(0)), ...]
@@ -104,9 +108,9 @@ class PatientModelAttention(nn.Module):
 
         # pick the right encoder model
         if cfg["timm"]:
-            self.model = build_timm(cfg, cfg["adapter"])
+            self.model = build_timm(cfg)
         elif cfg["dino"]:
-            self.model = build_dino(cfg["dino_size"], cfg["adapter"])
+            self.model = build_dino(cfg["dino_size"])
 
         # load a pretrained model
         if len(cfg["pretrained_path"]) > 0:
@@ -116,7 +120,10 @@ class PatientModelAttention(nn.Module):
             )
         else:
             print("The training is from scatch")
-
+        
+        # add adapters
+        add_adapter(self.model, cfg['adapter'])
+        
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
@@ -157,7 +164,7 @@ class PatientModelAttention(nn.Module):
         return proj_output
 
 
-def build_dino(model_type, adapter):
+def build_dino(model_type):
     """
     Credit : DLMI TP
 
@@ -169,34 +176,11 @@ def build_dino(model_type, adapter):
     """
     model = torch.hub.load("facebookresearch/dinov2", f"dinov2_{model_type}14")
 
-    if adapter == "bottleneck":
-        print("Use bottleneck adapter")
-        add_bottleneck_adapter(model)
-        freeze_model_bottleneck(model)
-
-    elif adapter == "adaptformer":
-        print("Use adaptformer adapter")
-        add_adaptformer(model)
-        freeze_model_adaptformer(model)
-
-    elif adapter == "lora":
-        print("Use lora adapter")
-        add_lora(model)
-        freeze_model_lora(model)
-
-    elif adapter == "prompttuning":
-        print("Use prompttuning adapter")
-        add_prompttuning(model)
-        freeze_model_prompttuning(model)
-
-    else:
-        print("No adapter used")
-
     return model
 
 
 
-def build_timm(cfg, adapter):
+def build_timm(cfg):
     """
     Credit : DLMI TP
 
@@ -212,6 +196,10 @@ def build_timm(cfg, adapter):
                 num_classes=cfg["nb_class"],
             )
 
+    return model
+
+
+def add_adapter(model, adapter):
     if adapter == "bottleneck":
         print("Use bottleneck adapter")
         add_bottleneck_adapter(model)
@@ -234,5 +222,3 @@ def build_timm(cfg, adapter):
 
     else:
         print("No adapter used")
-
-    return model
