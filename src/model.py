@@ -63,9 +63,9 @@ class PatientModel(nn.Module):
             self.model = build_dino(cfg["dino_size"], cfg["adapter"])
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
 
-        if len(cfg["pretrained"]) > 0:
+        if len(cfg["pretrained_path"]) > 0:
             self.model.load_state_dict(
-                torch.load(cfg["pretrained"])["model_state_dict"]
+                torch.load(cfg["pretrained_path"])["model_state_dict"]
             )
 
     def forward(self, x, mode):
@@ -109,10 +109,10 @@ class PatientModelAttention(nn.Module):
             self.model = build_dino(cfg["dino_size"], cfg["adapter"])
 
         # load a pretrained model
-        if len(cfg["pretrained"]) > 0:
-            print(f"We load the weigths {cfg['pretrained']}")
+        if len(cfg["pretrained_path"]) > 0:
+            print(f"We load the weigths {cfg['pretrained_path']}")
             self.model.load_state_dict(
-                torch.load(cfg["pretrained"])["model_state_dict"]
+                torch.load(cfg["pretrained_path"])["model_state_dict"]
             )
         else:
             print("The training is from scatch")
