@@ -38,11 +38,7 @@ class ModelFactory:
 
         elif cfg["timm"]:
             print(f"Loading timm model {cfg['timm_model']}")
-            return timm.create_model(
-                cfg["timm_model"],
-                pretrained=cfg["pretrained"],
-                num_classes=cfg["nb_class"],
-            )
+            return build_timm(cfg, cfg["adapter"])
 
         elif cfg["dino"]:
             print(f"Loading dino model {cfg['dino_size']}")
@@ -62,11 +58,7 @@ class PatientModel(nn.Module):
         self.sub_batch_size = cfg["sub_batch_size"]
 
         if cfg["timm"]:
-            self.model = timm.create_model(
-                cfg["timm_model"],
-                pretrained=cfg["pretrained"],
-                num_classes=cfg["nb_class"],
-            )
+            self.model = build_timm(cfg, cfg["adapter"])
         elif cfg["dino"]:
             self.model = build_dino(cfg["dino_size"], cfg["adapter"])
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
@@ -112,11 +104,7 @@ class PatientModelAttention(nn.Module):
 
         # pick the right encoder model
         if cfg["timm"]:
-            self.model = timm.create_model(
-                cfg["timm_model"],
-                pretrained=cfg["pretrained"],
-                num_classes=cfg["nb_class"],
-            )
+            self.model = build_timm(cfg, cfg["adapter"])
         elif cfg["dino"]:
             self.model = build_dino(cfg["dino_size"], cfg["adapter"])
 
@@ -180,6 +168,49 @@ def build_dino(model_type, adapter):
         model [DinoVisionTransformer]: trained DINOv2 model
     """
     model = torch.hub.load("facebookresearch/dinov2", f"dinov2_{model_type}14")
+
+    if adapter == "bottleneck":
+        print("Use bottleneck adapter")
+        add_bottleneck_adapter(model)
+        freeze_model_bottleneck(model)
+
+    elif adapter == "adaptformer":
+        print("Use adaptformer adapter")
+        add_adaptformer(model)
+        freeze_model_adaptformer(model)
+
+    elif adapter == "lora":
+        print("Use lora adapter")
+        add_lora(model)
+        freeze_model_lora(model)
+
+    elif adapter == "prompttuning":
+        print("Use prompttuning adapter")
+        add_prompttuning(model)
+        freeze_model_prompttuning(model)
+
+    else:
+        print("No adapter used")
+
+    return model
+
+
+
+def build_timm(cfg, adapter):
+    """
+    Credit : DLMI TP
+
+    Load a trained DINOv2 model.
+    arguments:
+        model_type [str]: type of model to train (vits, vitb, vitl, vitg)
+    returns:
+        model [DinoVisionTransformer]: trained DINOv2 model
+    """
+    model = timm.create_model(
+                cfg["timm_model"],
+                pretrained=cfg["pretrained"],
+                num_classes=cfg["nb_class"],
+            )
 
     if adapter == "bottleneck":
         print("Use bottleneck adapter")
