@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 
 # third party library
-from src.utils import aggregation
+from .utils import aggregation
 
-from src.adapter import (
+from .adapter import (
     add_bottleneck_adapter,
     freeze_model_bottleneck,
     add_adaptformer,
