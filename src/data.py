@@ -20,9 +20,10 @@ class DataloaderFactory:
         shuffle,
         drop_last=False,
         transform=None,
+        oversampling={"0": 1, "1": 1},
     ):
         if cfg["dataset_name"] == "DatasetPerImg":
-            dataset = DatasetPerImg(path_root, split_indexes, mode, transform)
+            dataset = DatasetPerImg(path_root, split_indexes, mode, oversampling, transform)
             dataloader = DataLoader(
                 dataset,
                 batch_size=cfg["batch_size"],
@@ -44,7 +45,7 @@ class DataloaderFactory:
 
 
 class DatasetPerImg(Dataset):
-    def __init__(self, path_root, indexes, mode, transform=None):
+    def __init__(self, path_root, indexes, mode, oversampling, transform=None):
         self.indexes = indexes
         self.transform = transform
         self.list_im = []
@@ -61,7 +62,10 @@ class DatasetPerImg(Dataset):
         for patient in indexes:
             patient_im = os.listdir(os.path.join(path_im, patient))
             for path in patient_im:
-                self.list_im.append(os.path.join(path_im, patient, path))
+                # oversampling: given the labels 0 or 1
+                # oversampling is a dictionary with the number of oversampling for each label
+                for _ in range(oversampling[str(self.df.loc[patient, "LABEL"])]):
+                    self.list_im.append(os.path.join(path_im, patient, path))
 
     def __getitem__(self, idx):
         _path = self.list_im[idx]
