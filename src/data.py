@@ -23,7 +23,9 @@ class DataloaderFactory:
         oversampling={"0": 1, "1": 1},
     ):
         if cfg["dataset_name"] == "DatasetPerImg":
-            dataset = DatasetPerImg(path_root, split_indexes, mode, oversampling, transform)
+            dataset = DatasetPerImg(
+                path_root, split_indexes, mode, oversampling, transform
+            )
             dataloader = DataLoader(
                 dataset,
                 batch_size=cfg["batch_size"],
@@ -32,7 +34,9 @@ class DataloaderFactory:
             )
 
         elif cfg["dataset_name"] == "DatasetPerPatient":
-            dataset = DatasetPerPatient(path_root, split_indexes, mode, transform)
+            dataset = DatasetPerPatient(
+                path_root, split_indexes, mode, oversampling, transform
+            )
             dataloader = DataLoader(
                 dataset,
                 batch_size=cfg["batch_size"],
@@ -64,7 +68,10 @@ class DatasetPerImg(Dataset):
             for path in patient_im:
                 # oversampling: given the labels 0 or 1
                 # oversampling is a dictionary with the number of oversampling for each label
-                for _ in range(oversampling[str(self.df.loc[patient, "LABEL"])]):
+                if mode == "train":
+                    for _ in range(oversampling[str(self.df.loc[patient, "LABEL"])]):
+                        self.list_im.append(os.path.join(path_im, patient, path))
+                else:
                     self.list_im.append(os.path.join(path_im, patient, path))
 
     def __getitem__(self, idx):
@@ -87,7 +94,7 @@ class DatasetPerImg(Dataset):
 
 
 class DatasetPerPatient(Dataset):
-    def __init__(self, path_root, indexes, mode, transform=None):
+    def __init__(self, path_root, indexes, mode, oversampling, transform=None):
         self.indexes = indexes
         self.transform = transform
         self.patients_data = {}
@@ -103,11 +110,22 @@ class DatasetPerPatient(Dataset):
 
         for patient in indexes:
             patient_folder = os.path.join(path_im, patient)
-            patient_im = [
-                os.path.join(patient_folder, img)
-                for img in os.listdir(patient_folder)
-                if img.endswith(".jpg")
-            ]
+            patient_im = []
+
+            if mode == "train":
+                for _ in range(oversampling[str(self.df.loc[patient, "LABEL"])]):
+                    patient_im += [
+                        os.path.join(patient_folder, img)
+                        for img in os.listdir(patient_folder)
+                        if img.endswith(".jpg")
+                    ]
+
+            else:
+                patient_im += [
+                    os.path.join(patient_folder, img)
+                    for img in os.listdir(patient_folder)
+                    if img.endswith(".jpg")
+                ]
             self.patients_data[patient] = patient_im
 
     def __getitem__(self, idx):
