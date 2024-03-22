@@ -111,6 +111,7 @@ class PatientModelAttention(nn.Module):
             self.model = build_timm(cfg)
         elif cfg["dino"]:
             self.model = build_dino(cfg["dino_size"])
+            self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
 
         # load a pretrained model
         if len(cfg["pretrained_path"]) > 0:
