@@ -108,29 +108,28 @@ class DatasetPerPatient(Dataset):
 
         self.df = csv_processing(path_csv)
 
+        idx = 0
+        self.map_idx_patient = {}
         for patient in indexes:
             patient_folder = os.path.join(path_im, patient)
-            patient_im = []
-
+            patient_im = [
+                os.path.join(patient_folder, img)
+                for img in os.listdir(patient_folder)
+                if img.endswith(".jpg")
+            ]
             if mode == "train":
                 for _ in range(oversampling[str(self.df.loc[patient, "LABEL"])]):
-                    patient_im += [
-                        os.path.join(patient_folder, img)
-                        for img in os.listdir(patient_folder)
-                        if img.endswith(".jpg")
-                    ]
-
+                    self.patients_data[idx] = patient_im
+                    self.map_idx_patient[idx] = patient
+                    idx += 1
             else:
-                patient_im += [
-                    os.path.join(patient_folder, img)
-                    for img in os.listdir(patient_folder)
-                    if img.endswith(".jpg")
-                ]
-            self.patients_data[patient] = patient_im
+                self.patients_data[idx] = patient_im
+                self.map_idx_patient[idx] = patient
+                idx += 1
 
     def __getitem__(self, idx):
-        patient_id = self.indexes[idx]
-        patient_images = self.patients_data[patient_id]
+        patient_id = self.map_idx_patient[idx]
+        patient_images = self.patients_data[idx]
         images = []
 
         for img_path in patient_images:
