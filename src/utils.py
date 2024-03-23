@@ -1,11 +1,24 @@
+# standart libraries
 import json
 import random
+
+# third-party libraries
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import torch
 
 
-def aggregation(x, mode):
+def aggregation(x: torch.Tensor, mode: str) -> torch.Tensor:
+    """implement aggregation function
+
+    Args:
+        x (torch.Tensor): input tensor
+        mode (str): aggregation mode
+
+    Returns:
+        torch.Tensor: aggregated tensor
+    """
     if mode == "sum":
         x = x.sum(0)
     elif mode == "avg":
@@ -16,8 +29,23 @@ def aggregation(x, mode):
 
 
 def get_stratified_split(
-    df_annotation_train, df_annotation_test, save_path=None, ratio=0.8, with_plot=True
+    df_annotation_train: pd.DataFrame,
+    df_annotation_test: pd.DataFrame,
+    save_path: str = None,
+    ratio: float = 0.8,
+    with_plot: bool = True,
 ):
+    """Get a stratified split of the data and save it as a json file
+
+    Args:
+        df_annotation_train (pd.DataFrame): dataframe containing the training data
+        df_annotation_test (pd.DataFrame): dataframe containing the test data
+        save_path (str, optional): path to save the json file. Defaults to None.
+        ratio (float, optional): ratio of the training data. Defaults to 0.8.
+        with_plot (bool, optional): whether to plot the distribution. Defaults to True.
+    Returns:
+        _type_: dictionary containing the indices for each split
+    """
     n_train = int(ratio * len(df_annotation_train))
 
     train_indices = random.sample(range(len(df_annotation_train)), n_train)
@@ -111,7 +139,15 @@ def get_stratified_split(
     return map_mode_index
 
 
-def get_index_from_json(path):
+def get_index_from_json(path: str) -> dict:
+    """Load a json file and return the content as a dictionary
+
+    Args:
+        path (str): The path to the json file
+
+    Returns:
+        dict: The content of the json file
+    """
     with open(path, "r") as f:
         map_mode_index = json.load(f)
     return map_mode_index

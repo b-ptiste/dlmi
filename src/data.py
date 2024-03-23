@@ -1,27 +1,37 @@
+# standard libraries
+from __future__ import annotations
+
 import os
+from typing import Any
+
+# third-party libraries
 import numpy as np
 import pandas as pd
-from PIL import Image
 import torch
-from torch.utils.data import Dataset, DataLoader
 from datetime import datetime, timedelta
+from PIL import Image
+from torch.utils.data import Dataset, DataLoader
 
 
 class DataloaderFactory:
-    def __init__(self):
+    """
+    Class to create and get all the dataloaders
+    """
+
+    def __init__(self) -> None:
         pass
 
     def __call__(
         self,
-        cfg,
-        split_indexes,
-        mode,
-        path_root,
-        shuffle,
-        drop_last=False,
-        transform=None,
-        oversampling={"0": 1, "1": 1},
-    ):
+        cfg: dict,
+        split_indexes: list,
+        mode: str,
+        path_root: str,
+        shuffle: bool,
+        drop_last: bool = False,
+        transform: Any = None,
+        oversampling: dict = {"0": 1, "1": 1},
+    ) -> DataLoader:
         if cfg["dataset_name"] == "DatasetPerImg":
             dataset = DatasetPerImg(
                 path_root, split_indexes, mode, oversampling, transform
@@ -49,7 +59,18 @@ class DataloaderFactory:
 
 
 class DatasetPerImg(Dataset):
-    def __init__(self, path_root, indexes, mode, oversampling, transform=None):
+    """
+    DatasetPerImg: Dataset for image level
+    """
+
+    def __init__(
+        self,
+        path_root: str,
+        indexes: list,
+        mode: str,
+        oversampling: dict,
+        transform: Any = None,
+    ):
         self.indexes = indexes
         self.transform = transform
         self.list_im = []
@@ -74,7 +95,7 @@ class DatasetPerImg(Dataset):
                 else:
                     self.list_im.append(os.path.join(path_im, patient, path))
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Any:
         _path = self.list_im[idx]
         image = Image.open(_path)
         idx_patient = _path.split("/")[-2]
@@ -89,12 +110,23 @@ class DatasetPerImg(Dataset):
             image = self.transform(image) / 255.0
         return image, annotation
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.list_im)
 
 
 class DatasetPerPatient(Dataset):
-    def __init__(self, path_root, indexes, mode, oversampling, transform=None):
+    """
+    DatasetPerPatient: Dataset for patient level
+    """
+
+    def __init__(
+        self,
+        path_root: str,
+        indexes: list,
+        mode: str,
+        oversampling: dict,
+        transform: Any = None,
+    ):
         self.indexes = indexes
         self.transform = transform
         self.patients_data = {}
@@ -127,7 +159,7 @@ class DatasetPerPatient(Dataset):
                 self.map_idx_patient[idx] = patient
                 idx += 1
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Any:
         patient_id = self.map_idx_patient[idx]
         patient_images = self.patients_data[idx]
         images = []
@@ -148,13 +180,18 @@ class DatasetPerPatient(Dataset):
 
         return images, annotation
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.map_idx_patient)
 
 
-def calculate_age(dob_str):
-    """
-    Calculate age from a format date string.
+def calculate_age(dob_str: str) -> float:
+    """calculate_age
+
+    Args:
+        dob_str (str): string representing the date of birth
+
+    Returns:
+        float: age in years normalized
     """
 
     if "/" in dob_str:
@@ -168,7 +205,15 @@ def calculate_age(dob_str):
     return age_timedelta.days / 365.25
 
 
-def csv_processing(path):
+def csv_processing(path: str):
+    """_summary_
+
+    Args:
+        path (str): path to the csv file
+
+    Returns:
+        _type_: processed dataframe
+    """
     df = pd.read_csv(path)
 
     df["AGE"] = df["DOB"].apply(calculate_age)

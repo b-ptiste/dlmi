@@ -1,8 +1,9 @@
+# third party libraries
 import timm
 import torch
 import torch.nn as nn
 
-# third party library
+# local libraries
 from .utils import aggregation
 
 from .adapter import (
@@ -18,10 +19,14 @@ from .adapter import (
 
 
 class ModelFactory:
-    def __init__(self):
+    """
+    Class to create and get all the models
+    """
+
+    def __init__(self) -> None:
         pass
 
-    def __call__(self, cfg):
+    def __call__(self, cfg: dict) -> nn.Module:
         model_name = cfg["model_name"]
 
         print("The configuration is:")
@@ -57,7 +62,11 @@ class ModelFactory:
 
 
 class PatientModel(nn.Module):
-    def __init__(self, cfg):
+    """
+    Custom model for the patient level
+    """
+
+    def __init__(self, cfg: dict) -> None:
         super(PatientModel, self).__init__()
 
         self.aggregation = cfg["aggregation"]
@@ -77,7 +86,7 @@ class PatientModel(nn.Module):
 
         add_adapter(self.model, cfg["adapter"])
 
-    def forward(self, x, mode):
+    def forward(self, x: torch.Tensor, mode: str) -> torch.Tensor:
         #         x = x[torch.randperm(x.size(0)), ...]
         xout_sub_batch = torch.zeros((x.size(0), 2)).to(self.device_1)
 
@@ -102,7 +111,11 @@ class PatientModel(nn.Module):
 
 
 class PatientModelAttention(nn.Module):
-    def __init__(self, cfg):
+    """
+    Custom model for the patient level with attention
+    """
+
+    def __init__(self, cfg: dict) -> None:
         super(PatientModelAttention, self).__init__()
 
         # variable definition
@@ -138,7 +151,7 @@ class PatientModelAttention(nn.Module):
         self.proj_1 = nn.Linear(cfg["latent_att"], cfg["latent_att"])
         self.proj_2 = nn.Linear(cfg["latent_att"], 2)
 
-    def forward(self, x, mode):
+    def forward(self, x: torch.Tensor, mode: str) -> torch.Tensor:
         #         x = x[torch.randperm(x.size(0)), ...]
         xout_sub_batch = torch.zeros((x.size(0), self.latent_att)).to(self.device_1)
         for i in range(0, x.size(0) // self.sub_batch_size + 1):
@@ -171,7 +184,11 @@ class PatientModelAttention(nn.Module):
 
 
 class PatientModelAttentionTab(nn.Module):
-    def __init__(self, cfg):
+    """
+    Custom model for the patient level with attention and tabular data
+    """
+
+    def __init__(self, cfg: dict) -> None:
         super(PatientModelAttentionTab, self).__init__()
 
         # variable definition
@@ -208,7 +225,7 @@ class PatientModelAttentionTab(nn.Module):
         self.proj_2 = nn.Linear(4, 4)
         self.proj_3 = nn.Linear(4, 2)
 
-    def forward(self, x, x_tab, mode):
+    def forward(self, x: torch.Tensor, x_tab: torch.Tensor, mode: str) -> torch.Tensor:
         #         x = x[torch.randperm(x.size(0)), ...]
         xout_sub_batch = torch.zeros((x.size(0), self.latent_att)).to(self.device_1)
         for i in range(0, x.size(0) // self.sub_batch_size + 1):
@@ -242,10 +259,8 @@ class PatientModelAttentionTab(nn.Module):
         return proj_output
 
 
-def build_dino(model_type):
+def build_dino(model_type: str) -> nn.Module:
     """
-    Credit : DLMI TP
-
     Load a trained DINOv2 model.
     arguments:
         model_type [str]: type of model to train (vits, vitb, vitl, vitg)
@@ -257,10 +272,8 @@ def build_dino(model_type):
     return model
 
 
-def build_timm(cfg):
+def build_timm(cfg: dict) -> nn.Module:
     """
-    Credit : DLMI TP
-
     Load a trained DINOv2 model.
     arguments:
         model_type [str]: type of model to train (vits, vitb, vitl, vitg)
