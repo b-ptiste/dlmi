@@ -29,10 +29,12 @@ class ModelFactory:
     def __call__(self, cfg: dict) -> nn.Module:
         model_name = cfg["model_name"]
 
+        # print the configuration
         print("The configuration is:")
         for k, v in cfg.items():
             print(f"{k} : {v}")
 
+        # load the model if registered
         if cfg["model_name"] == "PatientModel":
             print(f"Loading custom model {cfg['model_name']}")
             return PatientModel(cfg)
@@ -69,36 +71,47 @@ class PatientModel(nn.Module):
     def __init__(self, cfg: dict) -> None:
         super(PatientModel, self).__init__()
 
+        # variable definition
         self.aggregation = cfg["aggregation"]
         self.device_1 = cfg["device_1"]
         self.sub_batch_size = cfg["sub_batch_size"]
 
+        # pick the right encoder model
         if cfg["timm"]:
             self.model = build_timm(cfg)
+            
         elif cfg["dino"]:
             self.model = build_dino(cfg["dino_size"])
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
 
+        # load a pretrained model
         if len(cfg["pretrained_path"]) > 0:
             self.model.load_state_dict(
                 torch.load(cfg["pretrained_path"])["model_state_dict"]
             )
 
+        # add adapters
         add_adapter(self.model, cfg["adapter"])
 
     def forward(self, x: torch.Tensor, mode: str) -> torch.Tensor:
-        #         x = x[torch.randperm(x.size(0)), ...]
         xout_sub_batch = torch.zeros((x.size(0), 2)).to(self.device_1)
 
+        # loop over the data in sub-batches as the model is too big
+        # it corresponds to gradient accumulation
+        
         for i in range(0, x.size(0) // self.sub_batch_size + 1):
             start_idx = i * self.sub_batch_size
             end_idx = min(start_idx + self.sub_batch_size, x.size(0))
+            
             if mode == "val":
+                # we don't need to compute the gradient
                 with torch.no_grad():
+                    # drop edge case
                     if start_idx != end_idx:
                         x_sub_batch = x[start_idx:end_idx].to(self.device_1)
                         xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
             elif mode == "train":
+                # drop edge case
                 if start_idx != end_idx:
                     x_sub_batch = x[start_idx:end_idx].to(self.device_1)
                     xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
@@ -127,6 +140,7 @@ class PatientModelAttention(nn.Module):
         # pick the right encoder model
         if cfg["timm"]:
             self.model = build_timm(cfg)
+            
         elif cfg["dino"]:
             self.model = build_dino(cfg["dino_size"])
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
@@ -145,24 +159,34 @@ class PatientModelAttention(nn.Module):
 
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        
+        # multihead attention
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head"]
         )
+        
+        # classifier
         self.proj_1 = nn.Linear(cfg["latent_att"], cfg["latent_att"])
         self.proj_2 = nn.Linear(cfg["latent_att"], 2)
 
     def forward(self, x: torch.Tensor, mode: str) -> torch.Tensor:
-        #         x = x[torch.randperm(x.size(0)), ...]
+
+        # loop over the data in sub-batches as the model is too big
+        # it corresponds to gradient accumulation
+        
         xout_sub_batch = torch.zeros((x.size(0), self.latent_att)).to(self.device_1)
         for i in range(0, x.size(0) // self.sub_batch_size + 1):
             start_idx = i * self.sub_batch_size
             end_idx = min(start_idx + self.sub_batch_size, x.size(0))
             if mode == "val":
+                # we don't need to compute the gradient
                 with torch.no_grad():
+                    # drop edge case
                     if start_idx != end_idx:
                         x_sub_batch = x[start_idx:end_idx].to(self.device_1)
                         xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
             elif mode == "train":
+                # drop edge case
                 if start_idx != end_idx:
                     x_sub_batch = x[start_idx:end_idx].to(self.device_1)
                     xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
@@ -200,6 +224,7 @@ class PatientModelAttentionTab(nn.Module):
         # pick the right encoder model
         if cfg["timm"]:
             self.model = build_timm(cfg)
+            
         elif cfg["dino"]:
             self.model = build_dino(cfg["dino_size"])
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
@@ -221,22 +246,30 @@ class PatientModelAttentionTab(nn.Module):
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head"]
         )
+        
+        # classifier
         self.proj_1 = nn.Linear(cfg["latent_att"], 4)
         self.proj_2 = nn.Linear(4, 4)
         self.proj_3 = nn.Linear(4, 2)
 
     def forward(self, x: torch.Tensor, x_tab: torch.Tensor, mode: str) -> torch.Tensor:
-        #         x = x[torch.randperm(x.size(0)), ...]
         xout_sub_batch = torch.zeros((x.size(0), self.latent_att)).to(self.device_1)
+        
+        # loop over the data in sub-batches as the model is too big
+        # it corresponds to gradient accumulation
+        
         for i in range(0, x.size(0) // self.sub_batch_size + 1):
             start_idx = i * self.sub_batch_size
             end_idx = min(start_idx + self.sub_batch_size, x.size(0))
             if mode == "val":
+                # we don't need to compute the gradient
                 with torch.no_grad():
+                    # drop edge case
                     if start_idx != end_idx:
                         x_sub_batch = x[start_idx:end_idx].to(self.device_1)
                         xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
             elif mode == "train":
+                # drop edge case
                 if start_idx != end_idx:
                     x_sub_batch = x[start_idx:end_idx].to(self.device_1)
                     xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
@@ -249,6 +282,7 @@ class PatientModelAttentionTab(nn.Module):
             xout_sub_batch, xout_sub_batch, xout_sub_batch
         )
 
+        # classifier
         attn_output = attn_output.squeeze(0)
         proj_output = torch.nn.functional.gelu(self.proj_1(attn_output))  # classifier
         proj_output = torch.cat((proj_output, x_tab), dim=0)
@@ -290,6 +324,12 @@ def build_timm(cfg: dict) -> nn.Module:
 
 
 def add_adapter(model, adapter):
+    """Add an adapter to the model
+
+    Args:
+        model (_type_): model to which the adapter will be added
+        adapter (_type_): type of adapter to add
+    """
     if adapter == "bottleneck":
         print("Use bottleneck adapter")
         add_bottleneck_adapter(model)

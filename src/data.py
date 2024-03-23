@@ -150,6 +150,7 @@ class DatasetPerPatient(Dataset):
                 if img.endswith(".jpg")
             ]
             if mode == "train":
+                # oversampling: given the labels 0 or 1
                 for _ in range(oversampling[str(self.df.loc[patient, "LABEL"])]):
                     self.patients_data[idx] = patient_im
                     self.map_idx_patient[idx] = patient
@@ -194,6 +195,7 @@ def calculate_age(dob_str: str) -> float:
         float: age in years normalized
     """
 
+    # Parsing the date of birth
     if "/" in dob_str:
         month, day, year = map(int, dob_str.split("/"))
     elif "-" in dob_str:
@@ -220,7 +222,6 @@ def csv_processing(path: str):
 
     # fix the issue of annotation
     df.loc[df["GENDER"] == "f", "GENDER"] = "F"
-    # TODO one hot encoding
     df["BIN_GENDER"] = df["GENDER"].apply(lambda row: (row == "M") * 1.0)
 
     # normalize
