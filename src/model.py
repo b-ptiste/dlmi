@@ -172,7 +172,7 @@ class PatientModelAttention(nn.Module):
 
 class PatientModelAttentionTab(nn.Module):
     def __init__(self, cfg):
-        super(PatientModelAttention, self).__init__()
+        super(PatientModelAttentionTab, self).__init__()
 
         # variable definition
         self.device_1 = cfg["device_1"]
