@@ -70,7 +70,8 @@ class PatientModel(nn.Module):
             self.model.load_state_dict(
                 torch.load(cfg["pretrained_path"])["model_state_dict"]
             )
-            add_adapter(self.model, cfg['adapter'])
+        
+        add_adapter(self.model, cfg['adapter'])
 
     def forward(self, x, mode):
         #         x = x[torch.randperm(x.size(0)), ...]
