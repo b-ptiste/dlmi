@@ -35,6 +35,10 @@ class ModelFactory:
         elif cfg["model_name"] == "PatientModelAttention":
             print(f"Loading custom model {cfg['model_name']}")
             return PatientModelAttention(cfg)
+        
+        elif cfg["model_name"] == "PatientModelAttentionTab":
+            print(f"Loading custom model {cfg['model_name']}")
+            return PatientModelAttentionTab(cfg)
 
         elif cfg["timm"]:
             print(f"Loading timm model {cfg['timm_model']}")
@@ -131,6 +135,75 @@ class PatientModelAttention(nn.Module):
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head"]
         )
+        self.proj_1 = nn.Linear(cfg["latent_att"], cfg["latent_att"])
+        self.proj_2 = nn.Linear(cfg["latent_att"], 2)
+
+    def forward(self, x, mode):
+        #         x = x[torch.randperm(x.size(0)), ...]
+        xout_sub_batch = torch.zeros((x.size(0), self.latent_att)).to(self.device_1)
+        for i in range(0, x.size(0) // self.sub_batch_size + 1):
+            start_idx = i * self.sub_batch_size
+            end_idx = min(start_idx + self.sub_batch_size, x.size(0))
+            if mode == "val":
+                with torch.no_grad():
+                    if start_idx != end_idx:
+                        x_sub_batch = x[start_idx:end_idx].to(self.device_1)
+                        xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
+            elif mode == "train":
+                if start_idx != end_idx:
+                    x_sub_batch = x[start_idx:end_idx].to(self.device_1)
+                    xout_sub_batch[start_idx:end_idx] = self.model(x_sub_batch)
+            else:
+                raise f"Mode {mode} not implemented"
+
+        # perfom multihead attention
+        xout_sub_batch = xout_sub_batch.unsqueeze(0)
+        attn_output, _ = self.multihead_attn(
+            xout_sub_batch, xout_sub_batch, xout_sub_batch
+        )
+
+        attn_output = attn_output.squeeze(0)
+        proj_output = torch.nn.functional.relu(self.proj_1(attn_output))  # classifier
+        proj_output = self.proj_2(proj_output)
+        proj_output = aggregation(proj_output, self.aggregation)
+
+        return proj_output
+
+
+class PatientModelAttentionTab(nn.Module):
+    def __init__(self, cfg):
+        super(PatientModelAttention, self).__init__()
+
+        # variable definition
+        self.device_1 = cfg["device_1"]
+        self.latent_att = cfg["latent_att"]
+        self.sub_batch_size = cfg["sub_batch_size"]
+        self.aggregation = cfg["aggregation"]
+
+        # pick the right encoder model
+        if cfg["timm"]:
+            self.model = build_timm(cfg)
+        elif cfg["dino"]:
+            self.model = build_dino(cfg["dino_size"])
+            self.model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
+
+        # load a pretrained model
+        if len(cfg["pretrained_path"]) > 0:
+            print(f"We load the weigths {cfg['pretrained_path']}")
+            self.model.load_state_dict(
+                torch.load(cfg["pretrained_path"])["model_state_dict"]
+            )
+        else:
+            print("The training is from scatch")
+        
+        # add adapters
+        add_adapter(self.model, cfg['adapter'])
+        
+        # we put it after loading the pretrained
+        self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        self.multihead_attn = nn.MultiheadAttention(
+            embed_dim=cfg["latent_att"], num_heads=cfg["head"]
+        )
         self.proj_1 = nn.Linear(cfg["latent_att"],4)
         self.proj_2 = nn.Linear(4, 2)
 
@@ -160,14 +233,11 @@ class PatientModelAttention(nn.Module):
 
         attn_output = attn_output.squeeze(0)
         proj_output = torch.nn.functional.relu(self.proj_1(attn_output))  # classifier
-        print(proj_output.shape)
-        print(x_tab.shape)
-        proj_output = torch.stack([proj_output, x_tab], dim=1)
+        proj_output = torch.cat((proj_output, x_tab), dim=0)
         proj_output = self.proj_2(proj_output)
         proj_output = aggregation(proj_output, self.aggregation)
 
         return proj_output
-
 
 def build_dino(model_type):
     """
