@@ -131,10 +131,10 @@ class PatientModelAttention(nn.Module):
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head"]
         )
-        self.proj_1 = nn.Linear(cfg["latent_att"], cfg["latent_att"])
-        self.proj_2 = nn.Linear(cfg["latent_att"], 2)
+        self.proj_1 = nn.Linear(cfg["latent_att"],4)
+        self.proj_2 = nn.Linear(4, 2)
 
-    def forward(self, x, mode):
+    def forward(self, x, x_tab, mode):
         #         x = x[torch.randperm(x.size(0)), ...]
         xout_sub_batch = torch.zeros((x.size(0), self.latent_att)).to(self.device_1)
         for i in range(0, x.size(0) // self.sub_batch_size + 1):
@@ -160,6 +160,9 @@ class PatientModelAttention(nn.Module):
 
         attn_output = attn_output.squeeze(0)
         proj_output = torch.nn.functional.relu(self.proj_1(attn_output))  # classifier
+        print(proj_output.shape)
+        print(x_tab.shape)
+        proj_output = torch.stack([proj_output, x_tab], dim=1)
         proj_output = self.proj_2(proj_output)
         proj_output = aggregation(proj_output, self.aggregation)
 
