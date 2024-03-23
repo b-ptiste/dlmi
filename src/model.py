@@ -205,7 +205,8 @@ class PatientModelAttentionTab(nn.Module):
             embed_dim=cfg["latent_att"], num_heads=cfg["head"]
         )
         self.proj_1 = nn.Linear(cfg["latent_att"],4)
-        self.proj_2 = nn.Linear(4, 2)
+        self.proj_2 = nn.Linear(4, 4)
+        self.proj_3 = nn.Linear(4, 2)
 
     def forward(self, x, x_tab, mode):
         #         x = x[torch.randperm(x.size(0)), ...]
@@ -232,9 +233,10 @@ class PatientModelAttentionTab(nn.Module):
         )
 
         attn_output = attn_output.squeeze(0)
-        proj_output = torch.nn.functional.relu(self.proj_1(attn_output))  # classifier
+        proj_output = torch.nn.functional.gelu(self.proj_1(attn_output))  # classifier
         proj_output = torch.cat((proj_output, x_tab), dim=0)
-        proj_output = self.proj_2(proj_output)
+        proj_output = torch.nn.functional.gelu(self.proj_2(proj_output))
+        proj_output = self.proj_3(proj_output)
         proj_output = aggregation(proj_output, self.aggregation)
 
         return proj_output
