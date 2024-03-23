@@ -35,7 +35,7 @@ class ModelFactory:
         elif cfg["model_name"] == "PatientModelAttention":
             print(f"Loading custom model {cfg['model_name']}")
             return PatientModelAttention(cfg)
-        
+
         elif cfg["model_name"] == "PatientModelAttentionTab":
             print(f"Loading custom model {cfg['model_name']}")
             return PatientModelAttentionTab(cfg)
@@ -43,14 +43,14 @@ class ModelFactory:
         elif cfg["timm"]:
             print(f"Loading timm model {cfg['timm_model']}")
             model = build_timm(cfg)
-            add_adapter(model, cfg['adapter'])
+            add_adapter(model, cfg["adapter"])
             return model
 
         elif cfg["dino"]:
             print(f"Loading dino model {cfg['dino_size']}")
             model = build_dino(cfg["dino_size"])
             model.head = nn.Linear(cfg["feature_dim"], cfg["nb_class"])
-            add_adapter(model, cfg['adapter'])
+            add_adapter(model, cfg["adapter"])
             return model
         else:
             raise NotImplemented(f"{model_name} don't register")
@@ -74,8 +74,8 @@ class PatientModel(nn.Module):
             self.model.load_state_dict(
                 torch.load(cfg["pretrained_path"])["model_state_dict"]
             )
-        
-        add_adapter(self.model, cfg['adapter'])
+
+        add_adapter(self.model, cfg["adapter"])
 
     def forward(self, x, mode):
         #         x = x[torch.randperm(x.size(0)), ...]
@@ -126,10 +126,10 @@ class PatientModelAttention(nn.Module):
             )
         else:
             print("The training is from scatch")
-        
+
         # add adapters
-        add_adapter(self.model, cfg['adapter'])
-        
+        add_adapter(self.model, cfg["adapter"])
+
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
@@ -195,16 +195,16 @@ class PatientModelAttentionTab(nn.Module):
             )
         else:
             print("The training is from scatch")
-        
+
         # add adapters
-        add_adapter(self.model, cfg['adapter'])
-        
+        add_adapter(self.model, cfg["adapter"])
+
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head"]
         )
-        self.proj_1 = nn.Linear(cfg["latent_att"],4)
+        self.proj_1 = nn.Linear(cfg["latent_att"], 4)
         self.proj_2 = nn.Linear(4, 4)
         self.proj_3 = nn.Linear(4, 2)
 
@@ -241,6 +241,7 @@ class PatientModelAttentionTab(nn.Module):
 
         return proj_output
 
+
 def build_dino(model_type):
     """
     Credit : DLMI TP
@@ -256,7 +257,6 @@ def build_dino(model_type):
     return model
 
 
-
 def build_timm(cfg):
     """
     Credit : DLMI TP
@@ -268,10 +268,10 @@ def build_timm(cfg):
         model [DinoVisionTransformer]: trained DINOv2 model
     """
     model = timm.create_model(
-                cfg["timm_model"],
-                pretrained=cfg["pretrained"],
-                num_classes=cfg["nb_class"],
-            )
+        cfg["timm_model"],
+        pretrained=cfg["pretrained"],
+        num_classes=cfg["nb_class"],
+    )
 
     return model
 
