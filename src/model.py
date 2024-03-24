@@ -170,7 +170,7 @@ class PatientModelAttention(nn.Module):
 
         # multihead attention
         self.multihead_attn = nn.MultiheadAttention(
-            embed_dim=cfg["latent_att"], num_heads=cfg["head"]
+            embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
 
         # classifier
@@ -251,7 +251,7 @@ class PatientModelAttentionTab(nn.Module):
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
-            embed_dim=cfg["latent_att"], num_heads=cfg["head"]
+            embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
 
         # classifier
@@ -337,11 +337,11 @@ class PatientModelAttentionTabV2(nn.Module):
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
-            embed_dim=cfg["latent_att"], num_heads=cfg["head"]
+            embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
 
         self.multihead_attn_2 = nn.MultiheadAttention(
-            embed_dim=4, num_heads=cfg["head"]
+            embed_dim=4, num_heads=cfg["head_2"]
         )
 
         # classifier
@@ -427,11 +427,11 @@ class PatientModelCrossAttentionTab(nn.Module):
         # we put it after loading the pretrained
         self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
-            embed_dim=cfg["latent_att"], num_heads=cfg["head"]
+            embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
 
         self.multihead_attn_2 = nn.MultiheadAttention(
-            embed_dim=4, num_heads=cfg["head"]
+            embed_dim=4, num_heads=cfg["head_2"]
         )
 
         # classifier
