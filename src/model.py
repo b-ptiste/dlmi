@@ -415,12 +415,12 @@ def build_timm(cfg: dict) -> nn.Module:
     return model
 
 
-def add_adapter(model, adapter):
+def add_adapter(model: nn.Module, adapter: str) -> None:
     """Add an adapter to the model
 
     Args:
-        model (_type_): model to which the adapter will be added
-        adapter (_type_): type of adapter to add
+        model (nn.Module): model to which the adapter will be added
+        adapter (str): type of adapter to add
     """
     if adapter == "bottleneck":
         print("Use bottleneck adapter")
