@@ -24,7 +24,7 @@ def aggregation(x: torch.Tensor, mode: str) -> torch.Tensor:
     elif mode == "avg":
         x = x.mean(0)
     elif mode == "max":
-        x = x.max(0)
+        x, _ = x.max(0)
     return x
 
 
