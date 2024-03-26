@@ -1,4 +1,4 @@
-# Code from a GitHub repository: We were not able to find it again !
+# Code adapted from a GitHub repository: https://github.com/IcarusWizard/MAE/tree/main
 
 import torch
 import timm
