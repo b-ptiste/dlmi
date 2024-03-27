@@ -45,7 +45,7 @@ You will need to define two `cfg` dictionaries :
 - the first one corresponds to the pretraining, it will just train the encoder
 - the second one correponds to the finetuning using adapters and you can pick classifier available from `model.py`
 
-## MAE pretraining.
+## MAE pretraining
 
 The weights for the MAE section are available [here](https://drive.google.com/drive/folders/13yrd36hwnCahIzXtedJdakCQZdADHxLd?usp=sharing) for the model `vit_tiny_patch16_224.augreg_in21k` and `vit_small_patch16_224.augreg_in21k` model from [timm](https://huggingface.co/timm)
 
