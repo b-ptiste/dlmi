@@ -443,8 +443,10 @@ class PatientModelCrossAttentionTab(nn.Module):
 
         # we put it after loading the pretrained
         if 'resnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         elif 'efficientnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
@@ -559,3 +561,13 @@ def add_adapter(model: nn.Module, adapter: str) -> None:
 
     else:
         print("No adapter used")
+        
+
+def freeze_model(model: nn.Module) -> None:
+    """Freeze the model
+
+    Args:
+        model (nn.Module): model to freeze
+    """
+    for param in model.parameters():
+        param.requires_grad = False
