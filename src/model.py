@@ -166,7 +166,12 @@ class PatientModelAttention(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        if 'resnet' in cfg["timm_model"]:
+            self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        elif 'efficientnet' in cfg["timm_model"]:
+            self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        else:
+            self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
 
         # multihead attention
         self.multihead_attn = nn.MultiheadAttention(
@@ -249,7 +254,13 @@ class PatientModelAttentionTab(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        if 'resnet' in cfg["timm_model"]:
+            self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        elif 'efficientnet' in cfg["timm_model"]:
+            self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        else:
+            self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+            
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
@@ -335,7 +346,13 @@ class PatientModelAttentionTabV2(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        if 'resnet' in cfg["timm_model"]:
+            self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        elif 'efficientnet' in cfg["timm_model"]:
+            self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        else:
+            self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+            
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
@@ -425,7 +442,12 @@ class PatientModelCrossAttentionTab(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        if 'resnet' in cfg["timm_model"]:
+            self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        elif 'efficientnet' in cfg["timm_model"]:
+            self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
+        else:
+            self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
