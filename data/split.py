@@ -128,7 +128,8 @@ train_index = ['P27',
  'P155',
  'P129',
  'P174']
-    val_index = ['P123',
+
+val_index = ['P123',
  'P192',
  'P126',
  'P13',
