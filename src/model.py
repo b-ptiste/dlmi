@@ -167,8 +167,10 @@ class PatientModelAttention(nn.Module):
 
         # we put it after loading the pretrained
         if 'resnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         elif 'efficientnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
@@ -255,8 +257,10 @@ class PatientModelAttentionTab(nn.Module):
 
         # we put it after loading the pretrained
         if 'resnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         elif 'efficientnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
@@ -347,8 +351,10 @@ class PatientModelAttentionTabV2(nn.Module):
 
         # we put it after loading the pretrained
         if 'resnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         elif 'efficientnet' in cfg["timm_model"]:
+            freeze_model(self.model) # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
