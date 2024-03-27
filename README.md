@@ -9,7 +9,7 @@ If you are intrested by some interactive we invite you to navigate in our Wandb 
 
 ## Where to start
 
-Code is available within notebooks which is kind of main.py but as we run it on kaggle (to get acces to GPU) it is easier. You will need to fill cfg configuration dictionnaries, you give the explaination of the key in the `configuration.md` in `src`
+Code is available within notebooks which is kind of main.py but as we run it on kaggle (to get acces to GPU) it is easier. You will need to fill cfg configuration dictionnaries, you give the explaination of the key in the `notebooks/Configuration.md` in `src`
 
 ### Code organisation
 
