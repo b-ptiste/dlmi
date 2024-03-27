@@ -58,11 +58,12 @@ We proposed to train an end-to-end model using pre-trained models : MAE, DinoV2,
 Finally, we have proposed several classifiers that use the self-attention mechanism. 
 
 ![Classifier - MLP - Attention](https://github.com/b-ptiste/dlmi/assets/75781257/99cea953-508f-4b8a-9f7d-b2f650f37a48)
+![legend](https://github.com/b-ptiste/dlmi/assets/75781257/47ca437b-8975-459f-bb3f-b4a21d589b71)
 
 We have also proposed a model that uses clinical data in the form of cross attention, as a doctor might do.
 
 ![Classifier - Cross attention](https://github.com/b-ptiste/dlmi/assets/75781257/efe3bbfc-f406-4468-9ded-ba1a2fa02653)
-
+![legend](https://github.com/b-ptiste/dlmi/assets/75781257/47ca437b-8975-459f-bb3f-b4a21d589b71)
 
 # Credit
 
