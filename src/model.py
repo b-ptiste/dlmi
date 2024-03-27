@@ -569,5 +569,6 @@ def freeze_model(model: nn.Module) -> None:
     Args:
         model (nn.Module): model to freeze
     """
+    print('freeze model')
     for param in model.parameters():
         param.requires_grad = False
