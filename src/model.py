@@ -50,7 +50,7 @@ class ModelFactory:
         elif cfg["model_name"] == "PatientModelAttentionTabV2":
             print(f"Loading custom model {cfg['model_name']}")
             return PatientModelAttentionTabV2(cfg)
-        
+
         elif cfg["model_name"] == "PatientModelCrossAttentionTab":
             print(f"Loading custom model {cfg['model_name']}")
             return PatientModelCrossAttentionTab(cfg)
@@ -166,11 +166,11 @@ class PatientModelAttention(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        if 'resnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        if "resnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
-        elif 'efficientnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        elif "efficientnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
@@ -256,15 +256,15 @@ class PatientModelAttentionTab(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        if 'resnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        if "resnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
-        elif 'efficientnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        elif "efficientnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
-            
+
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
@@ -350,15 +350,15 @@ class PatientModelAttentionTabV2(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        if 'resnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        if "resnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
-        elif 'efficientnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        elif "efficientnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
-            
+
         self.multihead_attn = nn.MultiheadAttention(
             embed_dim=cfg["latent_att"], num_heads=cfg["head_1"]
         )
@@ -412,7 +412,6 @@ class PatientModelAttentionTabV2(nn.Module):
         return proj_output
 
 
-
 class PatientModelCrossAttentionTab(nn.Module):
     """
     Custom model for the patient level with attention and tabular data
@@ -448,11 +447,11 @@ class PatientModelCrossAttentionTab(nn.Module):
         add_adapter(self.model, cfg["adapter"])
 
         # we put it after loading the pretrained
-        if 'resnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        if "resnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.fc = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
-        elif 'efficientnet' in cfg["timm_model"]:
-            freeze_model(self.model) # freeze the model
+        elif "efficientnet" in cfg["timm_model"]:
+            freeze_model(self.model)  # freeze the model
             self.model.classifier = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
         else:
             self.model.head = nn.Linear(cfg["feature_dim"], cfg["latent_att"])
@@ -567,7 +566,7 @@ def add_adapter(model: nn.Module, adapter: str) -> None:
 
     else:
         print("No adapter used")
-        
+
 
 def freeze_model(model: nn.Module) -> None:
     """Freeze the model
@@ -575,6 +574,6 @@ def freeze_model(model: nn.Module) -> None:
     Args:
         model (nn.Module): model to freeze
     """
-    print('freeze model')
+    print("freeze model")
     for param in model.parameters():
         param.requires_grad = False
