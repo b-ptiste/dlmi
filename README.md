@@ -5,7 +5,7 @@ Lymphocytosis is characterized by an incerease in the number of lymphocytes, a t
 
 ## Experiments 
 
-If you are intrested by some interactive we invite you to navigate in our Wandb projet [here](https://wandb.ai/ii_timm/DLMI/reports/Some-Insight-of-our-experiments--Vmlldzo3MzAwMjcx?accessToken=s8ywd5gx8m7891ocsohpyqfysst0tjza8ury9b790p9v37jt3hcfo4nci1r9p8xi) !!
+If you are intrested by some interactive we invite you to navigate in our Wandb projet [here](https://api.wandb.ai/links/ii_timm/kpkpu224) !!
 
 ## Where to start
 
@@ -45,7 +45,7 @@ You will need to define two `cfg` dictionaries :
 - the first one corresponds to the pretraining, it will just train the encoder
 - the second one correponds to the finetuning using adapters and you can pick classifier available from `model.py`
 
-## MAE pretraining.
+## MAE pretraining
 
 The weights for the MAE section are available [here](https://drive.google.com/drive/folders/13yrd36hwnCahIzXtedJdakCQZdADHxLd?usp=sharing) for the model `vit_tiny_patch16_224.augreg_in21k` and `vit_small_patch16_224.augreg_in21k` model from [timm](https://huggingface.co/timm)
 
