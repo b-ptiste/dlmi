@@ -1,74 +1,90 @@
-This project was done during my semester at the MVA in the Deep Learning for Imaging course teached by O. COLLIOT (CNRS), M. VAKALOPOULOU.
+# Problem Definition 🩺  
+Lymphocytosis, an increase in lymphocytes in the bloodstream, can signal an immune response (reactive) or chronic conditions like blood cancers (tumoral). Diagnosis typically involves microscopic examination and clinical tests. To address reproducibility issues in microscopy and improve patient triage for flow cytometry, we applied Multi-Instance Learning, leveraging Vision Transformers for their ability to capture long-range relationships through self-attention. Adapting these models to medical imaging with self-supervision, we integrated clinical data to build an efficient, end-to-end trainable model using distillation and fine-tuning techniques.
 
-## Problem definiton
-Lymphocytosis is characterized by an incerease in the number of lymphocytes, a type of white blood cell, in the bloodstream. It can indicate the body’s immune system is fighting off pathogens (reactive) or it may result from chronic patologies including blood cancers (tumoral). The diagnosis relies on two stages : a microscopic examination and clinical tests. We tackle the lack of reproducibility of the first stage to better filter patients which should be referred for flow cytometry analysis. We approached this problem through the prism of Multi-Instance Learning, given that we have several bags of images per patient. To do this, we coupled the ability of Vision Transformers to capture long-distance relationships with self-attention mechanism between images of a patient we have adapted to medical imaging using self-supervision methods. We incorporated clinical data to create a trainable end-to- end model with low computational resources using the distillation mechanism and ingenious finetuning methods.
+---
 
-## Experiments 
+# Mini-Blog Post with Some Insights ✨  
+Check out the : 
+- **WandB project** [here](https://api.wandb.ai/links/ii_timm/kpkpu224)
+- **Report** : [here](https://drive.google.com/file/d/1Ewp0DFXEhgEjMmSIXJdOwpG5lwtnP4aQ/view)
 
-If you are intrested by some interactive we invite you to navigate in our Wandb projet [here](https://api.wandb.ai/links/ii_timm/kpkpu224) !!
+Access the weights for the MAE pretraining [here](https://drive.google.com/drive/folders/13yrd36hwnCahIzXtedJdakCQZdADHxLd?usp=sharing) from [timm](https://huggingface.co/timm) models.
 
-## Where to start
+- `vit_tiny_patch16_224.augreg_in21k`
+- `vit_small_patch16_224.augreg_in21k` 
 
-Code is available within notebooks which is kind of main.py but as we run it on kaggle (to get acces to GPU) it is easier. You will need to fill cfg configuration dictionnaries, you give the explaination of the key in the `notebooks/Configuration.md` in `src`
+These models were trained with limited resources (250 to 800 epochs) on different datasets, and convergence was not achieved due to lack of computing time. 🕒
 
-Our project right now support some models from timm:
-- VIT based models
-- ResNet based models
-- EfficientNet based models
-### Code organisation
+![MAE Training](https://github.com/b-ptiste/dlmi/assets/75781257/be0b2723-9ea7-47dc-bc82-26bbad606202)
 
-First, you will find the source code in `src`.
-- We provide in `data.py` and `model.py` and zoo of DataLoader and Models that you can access by the Factory. If you want to add another one, you just need to register it.
-- We also provide in `adapter.py` some generic code for finetuning VIT from timm.
-- Finally, the code for the MAE self-supervised pre-training is availale in : `mae_pretraining.py`.
-- The file `utils.py` contains some usefull functions.
+---
 
-One data split is provide if you want to launch our code quicly in `data/split.py`. However, we encourage you to create yours. We have created some usefull function to do it interactively.
+# Where to Start 🚀
 
-### Self-supervised pre-traning (MAE), 
-code : self_supervised_MAE.ipynb
+The code is available within notebooks as it was run on Kaggle to access GPUs.  
+### Key Steps:
+- You will need to fill the `cfg` configuration dictionaries.
+- Documentation is available at `notebooks/Configuration.md` in the `src` directory.
 
-It is compatible with VIT timm based models. you just need to fill the configuration `_cfg` and create your own dataloader and it will run !
+Our project currently supports the following image encoders from **timm**:
+- **VIT-based models**  
+- **ResNet-based models**  
+- **EfficientNet-based models**  
 
-### Train with MAE pretraining
-code : training_using_MAE.ipynb
+---
 
-You will need to define a `cfg` dictionary.
-You may need to create a wandb account and link it. If you don't want to, you can simply set the key `no_wandb`: True.
+## Code Organisation 📂
 
-Pay attention to change download you weight from Self-supervised pre-traning (MAE) (otherwise, our models weight are available check the `MAE pretraining``section for some models).
+The source code is in the `src` directory:
+- **`data.py` and `model.py`**: Contain a zoo of DataLoaders and Models accessible via a Factory. To add a new one, simply register it.
+- **`adapter.py`**: Includes generic code for fine-tuning VIT models from **timm**.
+- **`mae_pretraining.py`**: Contains code for MAE self-supervised pretraining.
+- **`utils.py`**: Provides useful utility functions.
 
-### Train with image instances pretraining
-code : final-notebook-experiments.ipynb
+A sample data split is available in `data/split.py` to quickly launch the code. However, we encourage you to create your own split using the interactive functions provided. 🎨
 
-You will need to define two `cfg` dictionaries :
-- the first one corresponds to the pretraining, it will just train the encoder
-- the second one correponds to the finetuning using adapters and you can pick classifier available from `model.py`
+---
 
-## MAE pretraining
+## Self-Supervised Pretraining (MAE) 🔍
 
-The weights for the MAE section are available [here](https://drive.google.com/drive/folders/13yrd36hwnCahIzXtedJdakCQZdADHxLd?usp=sharing) for the model `vit_tiny_patch16_224.augreg_in21k` and `vit_small_patch16_224.augreg_in21k` model from [timm](https://huggingface.co/timm)
+**Code**: `self_supervised_MAE.ipynb`  
+- Compatible with VIT-based models from **timm**.  
+- Simply fill the `_cfg` configuration dictionary and create a custom DataLoader to start training!
 
-The models were trained with limited resources from 250 to 800 epochs and different datasets, and convergence was not achieved (lack of computing time).
+---
 
-![MAE training](https://github.com/b-ptiste/dlmi/assets/75781257/be0b2723-9ea7-47dc-bc82-26bbad606202)
+## Training with MAE Pretraining 🔍
 
-## MIL training
+**Code**: `training_using_MAE.ipynb`  
+- You need to define a `cfg` dictionary.  
+- Optionally, link a **WandB** account for experiment tracking. If not, set `no_wandb: True` in the configuration.
 
-We proposed to train an end-to-end model using pre-trained models : MAE, DinoV2, ResNet, EfficientNet. For the VIT based models, we implemented adapter finetuning : LoRA, prompttuning, bottleneck adapter and adaptformer.
+⚠️ Make sure to download weights from the Self-Supervised Pretraining (MAE) section (or use the provided model weights). Refer to the `MAE Pretraining` section for details. 🔗
 
-![MLI model](https://github.com/b-ptiste/dlmi/assets/75781257/87914a15-3e35-40a0-8878-5e929ce117e8)
+---
 
-Finally, we have proposed several classifiers that use the self-attention mechanism. 
+## Training with Image Instances Pretraining 🔍
 
-![Classifier - MLP - Attention](https://github.com/b-ptiste/dlmi/assets/75781257/99cea953-508f-4b8a-9f7d-b2f650f37a48)
-![legend](https://github.com/b-ptiste/dlmi/assets/75781257/47ca437b-8975-459f-bb3f-b4a21d589b71)
+**Code**: `final-notebook-experiments.ipynb`  
+- Define **two `cfg` dictionaries**:
+  1. One for pretraining (training the encoder).  
+  2. One for fine-tuning (using adapters and classifiers from `model.py`).  
 
-We have also proposed a model that uses clinical data in the form of cross attention, as a doctor might do.
+---
 
-![Classifier - Cross attention](https://github.com/b-ptiste/dlmi/assets/75781257/efe3bbfc-f406-4468-9ded-ba1a2fa02653)
-![legend](https://github.com/b-ptiste/dlmi/assets/75781257/47ca437b-8975-459f-bb3f-b4a21d589b71)
+# MIL Training 📝
 
-# Credit
+We proposed an end-to-end model trained using pre-trained models like **MAE**, **DinoV2**, **ResNet**, and **EfficientNet**. For VIT-based models, we implemented adapter fine-tuning methods:  
+- **LoRA**  
+- **Prompt-tuning**  
+- **Bottleneck Adapter**  
+- **AdaptFormer**  
 
-We adapted the really great code of : https://github.com/IcarusWizard/MAE/tree/main. We also re-use some code from DLMI course practical works. 
+![MLI Model](https://github.com/b-ptiste/dlmi/assets/75781257/87914a15-3e35-40a0-8878-5e929ce117e8)
+
+---
+
+# Credit 🙌✨
+
+This project was completed during my semester at the MVA in the *Deep Learning for Imaging* course, taught by O. COLLIOT (CNRS) and M. VAKALOPOULOU. 
+This project adapted the excellent code from [IcarusWizard/MAE](https://github.com/IcarusWizard/MAE/tree/main). We also reused some practical code from the DLMI course. 👏
