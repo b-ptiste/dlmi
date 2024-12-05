@@ -26,7 +26,7 @@ The code is available within notebooks as it was run on Kaggle to access GPUs.
 - You will need to fill the `cfg` configuration dictionaries.
 - Documentation is available at `notebooks/Configuration.md` in the `src` directory.
 
-Our project currently supports the following image encoders from **timm**:
+Our project currently supports the following image encoders from **timm** 🤗:
 - **VIT-based models**  
 - **ResNet-based models**  
 - **EfficientNet-based models**  
